@@ -1,0 +1,1019 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Zexx GPT — Sign In</title>
+<style>
+  :root{
+    --bg-0:#050308;
+    --purple-1:#7c2ae8;
+    --purple-2:#4c1d95;
+    --pink:#ec4899;
+    --violet:#8b5cf6;
+    --card-bg:rgba(255,255,255,0.045);
+    --card-border:rgba(255,255,255,0.12);
+    --text-0:#f5f3ff;
+    --text-1:#a8a3b8;
+    --text-2:#6f6a80;
+    --danger:#f75c5c;
+    --success:#3ee08a;
+    --field-bg:rgba(255,255,255,0.04);
+    --field-border:rgba(255,255,255,0.10);
+  }
+
+  *{box-sizing:border-box; margin:0; padding:0;}
+
+  html,body{
+    height:100%;
+    font-family:'Segoe UI', -apple-system, BlinkMacSystemFont, sans-serif;
+    background:var(--bg-0);
+    overflow:hidden;
+  }
+
+  body{
+    position:relative;
+    display:flex;
+    align-items:center;
+    justify-content:center;
+    min-height:100vh;
+  }
+
+  /* ---------- Ambient background ---------- */
+  .bg-blob{
+    position:fixed;
+    border-radius:50%;
+    filter:blur(90px);
+    opacity:0.55;
+    z-index:0;
+    pointer-events:none;
+    transition:opacity .6s ease;
+  }
+  .bg-blob.b1{
+    width:520px; height:520px;
+    top:-120px; left:-140px;
+    background:radial-gradient(circle, var(--purple-1), transparent 70%);
+  }
+  .bg-blob.b2{
+    width:480px; height:480px;
+    bottom:-160px; right:-120px;
+    background:radial-gradient(circle, var(--purple-2), transparent 70%);
+  }
+  .bg-blob.b3{
+    width:360px; height:360px;
+    top:40%; left:50%;
+    transform:translate(-50%,-50%);
+    background:radial-gradient(circle, var(--pink), transparent 75%);
+    opacity:0.18;
+  }
+
+  /* ---------- Stage / transition wrapper ---------- */
+  #stage{
+    position:relative;
+    width:400px;
+    max-width:92vw;
+    z-index:2;
+  }
+
+  /* ---------- Card ---------- */
+  .card{
+    position:relative;
+    background:var(--card-bg);
+    border:1px solid var(--card-border);
+    border-radius:22px;
+    padding:34px 30px 28px;
+    backdrop-filter:blur(22px);
+    -webkit-backdrop-filter:blur(22px);
+    box-shadow:
+      0 0 0 1px rgba(255,255,255,0.02),
+      0 25px 60px -20px rgba(0,0,0,0.7),
+      0 0 60px -10px rgba(140,60,230,0.25),
+      inset 0 1px 0 rgba(255,255,255,0.06);
+  }
+
+  .card::before{
+    content:"";
+    position:absolute;
+    inset:0;
+    border-radius:22px;
+    padding:1px;
+    background:linear-gradient(160deg, rgba(255,255,255,0.35), rgba(255,255,255,0) 40%, rgba(255,255,255,0) 60%, rgba(255,255,255,0.08));
+    -webkit-mask:linear-gradient(#fff 0 0) content-box, linear-gradient(#fff 0 0);
+    -webkit-mask-composite:xor;
+    mask-composite:exclude;
+    pointer-events:none;
+  }
+
+  .brand{
+    text-align:center;
+    font-size:11px;
+    letter-spacing:3px;
+    color:var(--text-2);
+    margin-bottom:18px;
+    font-weight:600;
+  }
+  .brand span{ color:var(--violet); }
+
+  .title{
+    text-align:center;
+    font-size:28px;
+    font-weight:800;
+    color:var(--text-0);
+    letter-spacing:0.3px;
+  }
+  .subtitle{
+    text-align:center;
+    font-size:13.5px;
+    color:var(--text-1);
+    margin-top:6px;
+    margin-bottom:26px;
+  }
+
+  .field{
+    margin-bottom:16px;
+  }
+  .field label{
+    display:block;
+    font-size:11px;
+    font-weight:700;
+    letter-spacing:1.2px;
+    color:var(--text-1);
+    margin-bottom:8px;
+  }
+  .field input{
+    width:100%;
+    background:var(--field-bg);
+    border:1px solid var(--field-border);
+    border-radius:12px;
+    padding:13px 14px;
+    color:var(--text-0);
+    font-size:14.5px;
+    outline:none;
+    transition:border-color .2s ease, box-shadow .2s ease, background .2s ease;
+    letter-spacing:0.3px;
+  }
+  .field input::placeholder{ color:var(--text-2); }
+  .field input:focus{
+    border-color:var(--violet);
+    background:rgba(139,92,246,0.06);
+    box-shadow:0 0 0 3px rgba(139,92,246,0.15);
+  }
+  .field input.error{
+    border-color:var(--danger);
+    box-shadow:0 0 0 3px rgba(247,92,92,0.12);
+  }
+  .field .input-wrap{
+    position:relative;
+  }
+  .field .input-wrap input{
+    padding-right:44px;
+  }
+  .eye-toggle{
+    position:absolute;
+    right:6px;
+    top:50%;
+    transform:translateY(-50%);
+    width:32px;
+    height:32px;
+    border:none;
+    background:transparent;
+    color:var(--text-2);
+    cursor:pointer;
+    display:flex;
+    align-items:center;
+    justify-content:center;
+    border-radius:8px;
+    font-size:15px;
+    transition:color .2s ease, background .2s ease;
+  }
+  .eye-toggle:hover{ color:var(--text-0); background:rgba(255,255,255,0.06); }
+  .eye-toggle svg{
+    width:19px;
+    height:19px;
+    display:block;
+  }
+  .modal-eye{
+    position:static;
+    width:30px;
+    height:30px;
+    flex-shrink:0;
+    transform:none;
+    top:auto;
+    right:auto;
+  }
+  .info-password-box{
+    display:flex;
+    align-items:center;
+    justify-content:space-between;
+    background:var(--field-bg);
+    border:1px solid var(--field-border);
+    border-radius:10px;
+    padding:8px 8px 8px 12px;
+    margin-bottom:8px;
+  }
+  .info-password-box .k{
+    color:var(--text-1);
+    font-size:13px;
+    flex-shrink:0;
+    margin-right:10px;
+  }
+  .info-password-box .v{
+    color:var(--text-0);
+    font-weight:700;
+    letter-spacing:0.4px;
+    flex:1;
+    text-align:left;
+  }
+  .hint{
+    font-size:11px;
+    color:var(--text-2);
+    margin-top:6px;
+    line-height:1.4;
+  }
+  .warn{
+    font-size:11.5px;
+    color:var(--danger);
+    margin-top:6px;
+    min-height:0;
+    display:none;
+  }
+  .warn.show{ display:block; }
+
+  /* status row (replaces "Forgot password") */
+  .status-row{
+    display:flex;
+    justify-content:flex-end;
+    align-items:center;
+    min-height:18px;
+    margin:-4px 0 16px;
+    font-size:12px;
+    font-weight:600;
+    gap:6px;
+  }
+  .status-row.center{ justify-content:center; }
+  .status-dot{
+    width:7px; height:7px; border-radius:50%;
+    background:var(--violet);
+    animation:pulse 1s infinite ease-in-out;
+  }
+  @keyframes pulse{
+    0%,100%{ opacity:.3; transform:scale(0.8);}
+    50%{ opacity:1; transform:scale(1.1);}
+  }
+  .status-text.verifying{ color:var(--text-1); }
+  .status-text.ok{ color:var(--success); }
+  .status-text.fail{ color:var(--danger); }
+
+  .btn{
+    width:100%;
+    border:none;
+    border-radius:12px;
+    padding:14px;
+    font-size:15px;
+    font-weight:700;
+    color:#fff;
+    cursor:pointer;
+    background:linear-gradient(90deg, var(--pink), var(--purple-1));
+    box-shadow:0 10px 25px -8px rgba(180,60,220,0.55);
+    transition:transform .15s ease, box-shadow .15s ease, opacity .15s ease;
+    position:relative;
+    overflow:hidden;
+  }
+  .btn:hover{ transform:translateY(-1px); box-shadow:0 14px 30px -8px rgba(180,60,220,0.7); }
+  .btn:active{ transform:translateY(0px) scale(0.99); }
+  .btn:disabled{ opacity:.6; cursor:not-allowed; transform:none; }
+
+  .switch-row{
+    text-align:center;
+    margin-top:18px;
+    font-size:12.5px;
+    color:var(--text-2);
+  }
+  .switch-row a{
+    color:var(--violet);
+    font-weight:700;
+    text-decoration:none;
+    cursor:pointer;
+  }
+  .switch-row a:hover{ text-decoration:underline; }
+
+  .signup-loading-row{
+    display:flex;
+    justify-content:flex-end;
+    margin-top:10px;
+    font-size:12px;
+    font-weight:600;
+    gap:6px;
+    min-height:16px;
+  }
+
+  /* ---------- transition animations for card swap ---------- */
+  .card-anim-out-left{ animation:outLeft .5s cubic-bezier(.4,0,.2,1) forwards; }
+  .card-anim-in-right{ animation:inRight .5s cubic-bezier(.16,1,.3,1) forwards; }
+  .card-anim-out-zoom{ animation:outZoom .38s cubic-bezier(.4,0,.2,1) forwards; }
+  .card-anim-in-capcut{ animation:inCapcut .6s cubic-bezier(.16,1,.3,1) forwards; }
+
+  @keyframes outLeft{ to{ opacity:0; transform:translateX(-36px) scale(.97);} }
+  @keyframes inRight{ from{ opacity:0; transform:translateX(36px) scale(.97);} to{ opacity:1; transform:translateX(0) scale(1);} }
+  @keyframes outZoom{ to{ opacity:0; transform:scale(1.035) translateY(-4px);} }
+  @keyframes inCapcut{
+    0%{ opacity:0; transform:scale(.94) translateY(6px); filter:blur(3px);}
+    100%{ opacity:1; transform:scale(1) translateY(0); filter:blur(0);}
+  }
+
+  /* ---------- Loading screen ---------- */
+  #loading-screen{
+    position:fixed;
+    inset:0;
+    z-index:10;
+    display:flex;
+    align-items:center;
+    justify-content:center;
+    flex-direction:column;
+    background:
+      radial-gradient(circle at 30% 30%, rgba(124,42,232,0.35), transparent 55%),
+      radial-gradient(circle at 70% 70%, rgba(76,29,149,0.3), transparent 55%),
+      #1c1b22;
+    opacity:0;
+    visibility:hidden;
+    pointer-events:none;
+    transition:opacity .55s cubic-bezier(.4,0,.2,1), visibility 0s linear .55s;
+  }
+  #loading-screen.show{
+    opacity:1;
+    visibility:visible;
+    pointer-events:all;
+    transition:opacity .55s cubic-bezier(.4,0,.2,1), visibility 0s linear 0s;
+  }
+
+  .spinner{
+    width:64px; height:64px;
+    border-radius:50%;
+    border:4px solid rgba(255,255,255,0.08);
+    border-top:4px solid var(--violet);
+    border-right:4px solid var(--purple-2);
+    animation:spin .9s linear infinite;
+    box-shadow:0 0 30px rgba(139,92,246,0.35);
+  }
+  @keyframes spin{ to{ transform:rotate(360deg);} }
+  .loading-text{
+    margin-top:18px;
+    color:var(--text-0);
+    font-size:14px;
+    letter-spacing:2px;
+    font-weight:600;
+    opacity:.85;
+  }
+
+  /* ---------- Success Modal ---------- */
+  #modal-overlay{
+    position:fixed; inset:0;
+    background:rgba(0,0,0,0.6);
+    z-index:20;
+    display:none;
+    align-items:center;
+    justify-content:center;
+    backdrop-filter:blur(4px);
+  }
+  #modal-overlay.show{ display:flex; }
+
+  #modal-box{
+    width:460px;
+    max-width:92vw;
+    max-height:86vh;
+    overflow-y:auto;
+    background:linear-gradient(160deg, rgba(30,20,45,0.95), rgba(10,8,16,0.97));
+    border:1px solid rgba(255,255,255,0.12);
+    border-radius:24px;
+    padding:28px 26px 24px;
+    position:relative;
+    box-shadow:0 30px 80px -20px rgba(0,0,0,0.8), 0 0 70px -15px rgba(139,92,246,0.35);
+    transform:scale(0.05);
+    opacity:0;
+    transition:transform .5s cubic-bezier(.2,1.4,.3,1), opacity .3s ease;
+  }
+  #modal-box.show{ transform:scale(1); opacity:1; }
+
+  .modal-close{
+    position:absolute;
+    top:16px; right:16px;
+    width:30px; height:30px;
+    border-radius:50%;
+    border:1px solid var(--field-border);
+    background:rgba(255,255,255,0.05);
+    color:var(--text-1);
+    font-size:15px;
+    cursor:pointer;
+    display:flex; align-items:center; justify-content:center;
+    transition:background .2s ease, color .2s ease;
+  }
+  .modal-close:hover{ background:rgba(247,92,92,0.15); color:var(--danger); }
+
+  .modal-header{
+    display:flex;
+    align-items:center;
+    gap:10px;
+    font-size:19px;
+    font-weight:800;
+    color:var(--success);
+    margin-bottom:4px;
+  }
+  .modal-header .check{
+    width:26px; height:26px;
+    border-radius:50%;
+    background:rgba(62,224,138,0.15);
+    display:flex; align-items:center; justify-content:center;
+    font-size:14px;
+  }
+  .modal-sub{
+    font-size:12.5px;
+    color:var(--text-2);
+    margin-bottom:20px;
+  }
+
+  .section-title{
+    font-size:12px;
+    letter-spacing:1.5px;
+    font-weight:800;
+    color:var(--violet);
+    margin-bottom:10px;
+    margin-top:20px;
+  }
+  .info-row{
+    display:flex;
+    justify-content:space-between;
+    align-items:center;
+    padding:10px 12px;
+    background:var(--field-bg);
+    border:1px solid var(--field-border);
+    border-radius:10px;
+    margin-bottom:8px;
+    font-size:13px;
+  }
+  .info-row .k{ color:var(--text-1); }
+  .info-row .v{ color:var(--text-0); font-weight:700; letter-spacing:0.4px; }
+
+  .account-row{
+    display:flex;
+    justify-content:space-between;
+    align-items:center;
+    padding:12px 14px;
+    background:rgba(139,92,246,0.08);
+    border:1px solid rgba(139,92,246,0.25);
+    border-radius:10px;
+    margin-bottom:10px;
+  }
+  .account-row .v{
+    color:var(--text-0);
+    font-weight:800;
+    font-family:'Courier New', monospace;
+    font-size:13.5px;
+    letter-spacing:0.5px;
+  }
+  .copy-btn{
+    border:none;
+    background:rgba(255,255,255,0.08);
+    color:var(--text-0);
+    font-size:11px;
+    font-weight:700;
+    padding:6px 10px;
+    border-radius:7px;
+    cursor:pointer;
+    transition:background .2s ease;
+    flex-shrink:0;
+    margin-left:10px;
+  }
+  .copy-btn:hover{ background:rgba(139,92,246,0.35); }
+  .copy-btn.copied{ background:rgba(62,224,138,0.25); color:var(--success); }
+
+  .save-warning{
+    margin-top:14px;
+    padding:10px 12px;
+    border-radius:10px;
+    background:rgba(247,92,92,0.08);
+    border:1px solid rgba(247,92,92,0.25);
+    color:#ffb4b4;
+    font-size:11.5px;
+    line-height:1.5;
+  }
+
+  .modal-done-btn{
+    margin-top:20px;
+  }
+
+  .hidden{ display:none !important; }
+
+  ::-webkit-scrollbar{ width:6px; }
+  ::-webkit-scrollbar-thumb{ background:rgba(139,92,246,0.3); border-radius:4px; }
+</style>
+</head>
+<body>
+
+  <div class="bg-blob b1"></div>
+  <div class="bg-blob b2"></div>
+  <div class="bg-blob b3"></div>
+
+  <div id="stage">
+
+    <!-- ================= SIGN IN CARD ================= -->
+    <div class="card" id="signin-card">
+      <div class="brand">ZEXX<span>GPT</span></div>
+      <div class="title">Welcome</div>
+      <div class="subtitle">Sign in to your account</div>
+
+      <div class="field">
+        <label>USERNAME ID</label>
+        <input type="text" id="si-userid" placeholder="USER-ID-XXXXXX" autocomplete="off">
+      </div>
+
+      <div class="field">
+        <label>KEY ID</label>
+        <input type="text" id="si-keyid" placeholder="KEY-ID-XXXX" autocomplete="off">
+      </div>
+
+      <div class="field">
+        <label>PASSWORD</label>
+        <div class="input-wrap">
+          <input type="password" id="si-password" placeholder="••••••••" autocomplete="off">
+          <button type="button" class="eye-toggle" data-target="si-password" aria-label="Show password"></button>
+        </div>
+      </div>
+
+      <div class="status-row" id="si-status-row">
+        <span class="status-dot hidden" id="si-status-dot"></span>
+        <span class="status-text" id="si-status-text"></span>
+      </div>
+
+      <button class="btn" id="si-submit">Sign In</button>
+
+      <div class="switch-row">
+        Don't have an account? <a id="go-signup">Sign Up</a>
+      </div>
+    </div>
+
+    <!-- ================= SIGN UP CARD ================= -->
+    <div class="card hidden" id="signup-card">
+      <div class="brand">ZEXX<span>GPT</span></div>
+      <div class="title">Sign Up</div>
+      <div class="subtitle">Create your Zexx GPT account</div>
+
+      <div class="field">
+        <label>USERNAME</label>
+        <input type="text" id="su-username" placeholder="Enter username" autocomplete="off">
+        <div class="hint">Create Your Username</div>
+        <div class="warn" id="su-username-warn"></div>
+      </div>
+
+      <div class="field">
+        <label>PASSWORD</label>
+        <div class="input-wrap">
+          <input type="password" id="su-password" placeholder="Enter password" autocomplete="off">
+          <button type="button" class="eye-toggle" data-target="su-password" aria-label="Show password"></button>
+        </div>
+        <div class="hint">Create your password - (Minimum 8 Letter)</div>
+        <div class="warn" id="su-password-warn"></div>
+      </div>
+
+      <div class="field">
+        <label>CONFIRM PASSWORD</label>
+        <div class="input-wrap">
+          <input type="password" id="su-confirm" placeholder="Repeat password" autocomplete="off">
+          <button type="button" class="eye-toggle" data-target="su-confirm" aria-label="Show password"></button>
+        </div>
+        <div class="hint">Confirm the Password</div>
+        <div class="warn" id="su-confirm-warn"></div>
+      </div>
+
+      <div class="field">
+        <label>SET MAX DEVICE</label>
+        <input type="text" inputmode="numeric" id="su-maxdevice" placeholder="e.g. 3" autocomplete="off">
+        <div class="hint">Input 1-10 Max Device</div>
+        <div class="warn" id="su-maxdevice-warn"></div>
+      </div>
+
+      <div class="signup-loading-row" id="su-status-row">
+        <span class="status-dot hidden" id="su-status-dot"></span>
+        <span class="status-text" id="su-status-text"></span>
+      </div>
+
+      <button class="btn" id="su-submit">Sign Up</button>
+
+      <div class="switch-row">
+        Already have an account? <a id="go-signin">Sign In</a>
+      </div>
+    </div>
+
+  </div>
+
+  <!-- ================= LOADING SCREEN ================= -->
+  <div id="loading-screen">
+    <div class="spinner"></div>
+    <div class="loading-text">Loading</div>
+  </div>
+
+  <!-- ================= SUCCESS MODAL ================= -->
+  <div id="modal-overlay">
+    <div id="modal-box">
+      <button class="modal-close" id="modal-close">✕</button>
+      <div class="modal-header"><span class="check">✓</span> Create Succesfull</div>
+      <div class="modal-sub">Your Zexx GPT account has been created.</div>
+
+      <div class="section-title">Information</div>
+      <div class="info-row"><span class="k">Username</span><span class="v" id="info-username">-</span></div>
+      <div class="info-password-box">
+        <span class="k">Password</span>
+        <span class="v" id="info-password">-</span>
+        <button type="button" class="eye-toggle modal-eye" id="info-password-toggle" aria-label="Show password"></button>
+      </div>
+      <div class="info-row"><span class="k">Max Device</span><span class="v" id="info-maxdevice">-</span></div>
+
+      <div class="section-title">Account</div>
+      <div class="account-row">
+        <span class="v" id="acc-userid">-</span>
+        <button type="button" class="copy-btn" data-copy="acc-userid">Copy</button>
+      </div>
+      <div class="account-row">
+        <span class="v" id="acc-keyid">-</span>
+        <button type="button" class="copy-btn" data-copy="acc-keyid">Copy</button>
+      </div>
+
+      <div class="save-warning">
+        Simpan Username ID dan Key ID di atas sekarang. Jika belum disalin, data ini tidak akan ditampilkan lagi dan diperlukan untuk Sign In.
+      </div>
+
+      <button class="btn modal-done-btn" id="modal-done">Selesai, Lanjut ke Sign In</button>
+    </div>
+  </div>
+
+<script>
+(function(){
+
+  // ---------------- In-memory "server" ----------------
+  const accounts = []; // { username, password, maxDevice, userId, keyId }
+
+  const ALPHA = "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ";
+  function randomAlpha(len){
+    let out = "";
+    for(let i=0;i<len;i++){ out += ALPHA[Math.floor(Math.random()*ALPHA.length)]; }
+    return out;
+  }
+  function generateUserId(){
+    let id;
+    do { id = "USER-ID-" + randomAlpha(6); } while(accounts.some(a=>a.userId===id));
+    return id;
+  }
+  function generateKeyId(){
+    let id;
+    do { id = "KEY-ID-" + randomAlpha(4); } while(accounts.some(a=>a.keyId===id));
+    return id;
+  }
+
+  // ---------------- Element refs ----------------
+  const signinCard = document.getElementById('signin-card');
+  const signupCard = document.getElementById('signup-card');
+  const stage = document.getElementById('stage');
+
+  const goSignup = document.getElementById('go-signup');
+  const goSignin = document.getElementById('go-signin');
+
+  // ---------------- Card switching animations ----------------
+  function showSignup(){
+    signinCard.classList.add('card-anim-out-zoom');
+    setTimeout(()=>{
+      signinCard.classList.add('hidden');
+      signinCard.classList.remove('card-anim-out-zoom');
+      signupCard.classList.remove('hidden');
+      signupCard.classList.add('card-anim-in-capcut');
+      setTimeout(()=> signupCard.classList.remove('card-anim-in-capcut'), 600);
+    }, 380);
+  }
+
+  function showSignin(){
+    signupCard.classList.add('card-anim-out-zoom');
+    setTimeout(()=>{
+      signupCard.classList.add('hidden');
+      signupCard.classList.remove('card-anim-out-zoom');
+      signinCard.classList.remove('hidden');
+      signinCard.classList.add('card-anim-in-capcut');
+      setTimeout(()=> signinCard.classList.remove('card-anim-in-capcut'), 600);
+    }, 380);
+  }
+
+  goSignup.addEventListener('click', showSignup);
+  goSignin.addEventListener('click', showSignin);
+
+  // ---------------- Show / Hide password toggles (SVG icons) ----------------
+  const ICON_EYE = '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M1 12s4-7 11-7 11 7 11 7-4 7-11 7-11-7-11-7z"/><circle cx="12" cy="12" r="3"/></svg>';
+  const ICON_EYE_OFF = '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M17.94 17.94A10.94 10.94 0 0 1 12 19c-7 0-11-7-11-7a20.3 20.3 0 0 1 4.22-5.06M9.9 4.24A9.12 9.12 0 0 1 12 4c7 0 11 7 11 7a20.29 20.29 0 0 1-2.16 3.19m-6.72-1.07a3 3 0 1 1-4.24-4.24"/><line x1="1" y1="1" x2="23" y2="23"/></svg>';
+
+  function setEyeIcon(btn, visible){
+    btn.innerHTML = visible ? ICON_EYE_OFF : ICON_EYE;
+    btn.setAttribute('aria-label', visible ? 'Hide password' : 'Show password');
+  }
+
+  document.querySelectorAll('.eye-toggle[data-target]').forEach(btn=>{
+    setEyeIcon(btn, false);
+    btn.addEventListener('click', function(){
+      const input = document.getElementById(btn.getAttribute('data-target'));
+      if(!input) return;
+      const willShow = input.type === 'password';
+      input.type = willShow ? 'text' : 'password';
+      setEyeIcon(btn, willShow);
+    });
+  });
+
+  // ================= SIGN IN LOGIC =================
+  const siUserId = document.getElementById('si-userid');
+  const siKeyId = document.getElementById('si-keyid');
+  const siPassword = document.getElementById('si-password');
+  const siSubmit = document.getElementById('si-submit');
+  const siStatusDot = document.getElementById('si-status-dot');
+  const siStatusText = document.getElementById('si-status-text');
+  const loadingScreen = document.getElementById('loading-screen');
+
+  function setSiStatus(mode, text){
+    siStatusDot.classList.remove('hidden');
+    siStatusText.textContent = text;
+    siStatusText.className = 'status-text ' + mode;
+    if(mode === 'ok' || mode === 'fail'){
+      siStatusDot.classList.add('hidden');
+    }
+  }
+  function clearSiStatus(){
+    siStatusDot.classList.add('hidden');
+    siStatusText.textContent = '';
+  }
+
+  siSubmit.addEventListener('click', function(){
+    clearSiStatus();
+    const userId = siUserId.value.trim();
+    const keyId = siKeyId.value.trim();
+    const pass = siPassword.value;
+
+    [siUserId, siKeyId, siPassword].forEach(el=>el.classList.remove('error'));
+
+    if(!userId || !keyId || !pass){
+      setSiStatus('fail', 'All fields are required');
+      if(!userId) siUserId.classList.add('error');
+      if(!keyId) siKeyId.classList.add('error');
+      if(!pass) siPassword.classList.add('error');
+      return;
+    }
+
+    siSubmit.disabled = true;
+    setSiStatus('verifying', 'Verify');
+
+    setTimeout(()=>{
+      const account = accounts.find(a => a.userId === userId && a.keyId === keyId && a.password === pass);
+
+      if(!account){
+        setSiStatus('fail', 'Username ID or Key ID Not Found');
+        siUserId.classList.add('error');
+        siKeyId.classList.add('error');
+        siPassword.classList.add('error');
+        siSubmit.disabled = false;
+        return;
+      }
+
+      setSiStatus('ok', 'Succes');
+
+      setTimeout(()=>{
+        stage.classList.add('card-anim-out-left');
+        loadingScreen.classList.add('show');
+        setTimeout(()=>{
+          stage.style.visibility = 'hidden';
+        }, 500);
+        // Setelah animasi loading tampil, lanjut ke halaman chat.
+        setTimeout(()=>{
+          window.location.href = '/app';
+        }, 1800);
+      }, 550);
+
+    }, 1200);
+  });
+
+  // ================= SIGN UP LOGIC =================
+  const suUsername = document.getElementById('su-username');
+  const suPassword = document.getElementById('su-password');
+  const suConfirm = document.getElementById('su-confirm');
+  const suMaxDevice = document.getElementById('su-maxdevice');
+  const suSubmit = document.getElementById('su-submit');
+
+  const suUsernameWarn = document.getElementById('su-username-warn');
+  const suPasswordWarn = document.getElementById('su-password-warn');
+  const suConfirmWarn = document.getElementById('su-confirm-warn');
+  const suMaxDeviceWarn = document.getElementById('su-maxdevice-warn');
+
+  const suStatusDot = document.getElementById('su-status-dot');
+  const suStatusText = document.getElementById('su-status-text');
+
+  function warn(el, msgEl, msg){
+    if(msg){
+      el.classList.add('error');
+      msgEl.textContent = msg;
+      msgEl.classList.add('show');
+      return false;
+    } else {
+      el.classList.remove('error');
+      msgEl.textContent = '';
+      msgEl.classList.remove('show');
+      return true;
+    }
+  }
+
+  function validateUsername(){
+    const val = suUsername.value.trim();
+    if(val.length === 0) return warn(suUsername, suUsernameWarn, '');
+    if(val.length > 12) return warn(suUsername, suUsernameWarn, 'Username maksimal 12 karakter');
+    if(accounts.some(a => a.username.toLowerCase() === val.toLowerCase())){
+      return warn(suUsername, suUsernameWarn, 'Username sudah digunakan');
+    }
+    return warn(suUsername, suUsernameWarn, '');
+  }
+
+  function validatePassword(){
+    const val = suPassword.value;
+    if(val.length === 0) return warn(suPassword, suPasswordWarn, '');
+    if(val.length < 8) return warn(suPassword, suPasswordWarn, 'Password minimal 8 huruf');
+    if(val.length > 12) return warn(suPassword, suPasswordWarn, 'Password maksimal 12 karakter');
+    return warn(suPassword, suPasswordWarn, '');
+  }
+
+  function validateConfirm(){
+    const val = suConfirm.value;
+    if(val.length === 0) return warn(suConfirm, suConfirmWarn, '');
+    if(val !== suPassword.value) return warn(suConfirm, suConfirmWarn, 'Password tidak sama');
+    return warn(suConfirm, suConfirmWarn, '');
+  }
+
+  function validateMaxDevice(){
+    const raw = suMaxDevice.value.trim();
+    if(raw.length === 0) return warn(suMaxDevice, suMaxDeviceWarn, '');
+    const num = Number(raw);
+    if(!Number.isInteger(num) || num < 1 || num > 10){
+      return warn(suMaxDevice, suMaxDeviceWarn, 'Max Device harus angka 1-10');
+    }
+    return warn(suMaxDevice, suMaxDeviceWarn, '');
+  }
+
+  suUsername.addEventListener('input', validateUsername);
+  suPassword.addEventListener('input', ()=>{ validatePassword(); validateConfirm(); });
+  suConfirm.addEventListener('input', validateConfirm);
+  suMaxDevice.addEventListener('input', validateMaxDevice);
+
+  function setSuStatus(mode, text){
+    suStatusDot.classList.remove('hidden');
+    suStatusText.textContent = text;
+    suStatusText.className = 'status-text ' + mode;
+    if(mode === 'ok' || mode === 'fail') suStatusDot.classList.add('hidden');
+  }
+  function clearSuStatus(){
+    suStatusDot.classList.add('hidden');
+    suStatusText.textContent = '';
+  }
+
+  suSubmit.addEventListener('click', function(){
+    clearSuStatus();
+    const okUsername = validateUsername();
+    const okPassword = validatePassword();
+    const okConfirm = validateConfirm();
+    const okMax = validateMaxDevice();
+
+    const username = suUsername.value.trim();
+    const password = suPassword.value;
+    const confirm = suConfirm.value;
+    const maxDevice = suMaxDevice.value.trim();
+
+    let hasEmpty = false;
+    if(!username){ warn(suUsername, suUsernameWarn, 'Username wajib diisi'); hasEmpty = true; }
+    if(!password){ warn(suPassword, suPasswordWarn, 'Password wajib diisi'); hasEmpty = true; }
+    if(!confirm){ warn(suConfirm, suConfirmWarn, 'Confirm password wajib diisi'); hasEmpty = true; }
+    if(!maxDevice){ warn(suMaxDevice, suMaxDeviceWarn, 'Max Device wajib diisi'); hasEmpty = true; }
+
+    if(hasEmpty || !okUsername || !okPassword || !okConfirm || !okMax){
+      setSuStatus('fail', 'Please fix the errors above');
+      return;
+    }
+
+    suSubmit.disabled = true;
+    setSuStatus('verifying', 'Create Account');
+
+    setTimeout(()=>{
+      const userId = generateUserId();
+      const keyId = generateKeyId();
+
+      accounts.push({
+        username: username,
+        password: password,
+        maxDevice: Number(maxDevice),
+        userId: userId,
+        keyId: keyId
+      });
+
+      setSuStatus('ok', 'Succes');
+      suSubmit.disabled = false;
+
+      setTimeout(()=>{
+        openSuccessModal({ username, password, maxDevice, userId, keyId });
+      }, 400);
+
+    }, 1200);
+  });
+
+  // ================= SUCCESS MODAL =================
+  const modalOverlay = document.getElementById('modal-overlay');
+  const modalBox = document.getElementById('modal-box');
+  const modalClose = document.getElementById('modal-close');
+  const modalDone = document.getElementById('modal-done');
+
+  const infoPasswordEl = document.getElementById('info-password');
+  const infoPasswordToggle = document.getElementById('info-password-toggle');
+  let currentRealPassword = '';
+  let infoPasswordVisible = false;
+
+  setEyeIcon(infoPasswordToggle, false);
+
+  function renderInfoPassword(){
+    infoPasswordEl.textContent = infoPasswordVisible ? currentRealPassword : '•'.repeat(currentRealPassword.length);
+    setEyeIcon(infoPasswordToggle, infoPasswordVisible);
+  }
+
+  infoPasswordToggle.addEventListener('click', function(){
+    infoPasswordVisible = !infoPasswordVisible;
+    renderInfoPassword();
+  });
+
+  function openSuccessModal(data){
+    document.getElementById('info-username').textContent = data.username;
+    currentRealPassword = data.password;
+    infoPasswordVisible = false;
+    renderInfoPassword();
+    document.getElementById('info-maxdevice').textContent = data.maxDevice + ' Device';
+    document.getElementById('acc-userid').textContent = data.userId;
+    document.getElementById('acc-keyid').textContent = data.keyId;
+
+    modalOverlay.classList.add('show');
+    requestAnimationFrame(()=>{
+      requestAnimationFrame(()=> modalBox.classList.add('show'));
+    });
+  }
+
+  function closeSuccessModalToSignin(){
+    modalBox.classList.remove('show');
+    setTimeout(()=>{
+      modalOverlay.classList.remove('show');
+      // reset signup form
+      [suUsername, suPassword, suConfirm, suMaxDevice].forEach(el=>el.value='');
+      [suUsernameWarn, suPasswordWarn, suConfirmWarn, suMaxDeviceWarn].forEach(el=>{ el.textContent=''; el.classList.remove('show'); });
+      [suUsername, suPassword, suConfirm, suMaxDevice].forEach(el=>el.classList.remove('error'));
+      clearSuStatus();
+      showSignin();
+    }, 350);
+  }
+
+  modalClose.addEventListener('click', closeSuccessModalToSignin);
+  modalDone.addEventListener('click', closeSuccessModalToSignin);
+
+  // ================= COPY BUTTONS =================
+  function fallbackCopy(text){
+    const ta = document.createElement('textarea');
+    ta.value = text;
+    ta.style.position = 'fixed';
+    ta.style.top = '-1000px';
+    ta.style.left = '-1000px';
+    document.body.appendChild(ta);
+    ta.focus();
+    ta.select();
+    ta.setSelectionRange(0, text.length);
+    let ok = false;
+    try{ ok = document.execCommand('copy'); }catch(e){ ok = false; }
+    document.body.removeChild(ta);
+    return ok;
+  }
+
+  function copyText(text){
+    return new Promise((resolve)=>{
+      if(navigator.clipboard && navigator.clipboard.writeText && window.isSecureContext){
+        navigator.clipboard.writeText(text).then(()=> resolve(true)).catch(()=> resolve(fallbackCopy(text)));
+      } else {
+        resolve(fallbackCopy(text));
+      }
+    });
+  }
+
+  document.querySelectorAll('.copy-btn[data-copy]').forEach(btn=>{
+    btn.addEventListener('click', function(){
+      const targetId = btn.getAttribute('data-copy');
+      const text = document.getElementById(targetId).textContent;
+      copyText(text).then((ok)=>{
+        btn.textContent = ok ? 'Copied' : 'Failed';
+        btn.classList.toggle('copied', ok);
+        setTimeout(()=>{ btn.textContent = 'Copy'; btn.classList.remove('copied'); }, 1500);
+      });
+    });
+  });
+
+})();
+</script>
+</body>
+</html>
