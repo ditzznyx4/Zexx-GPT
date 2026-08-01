@@ -1,0 +1,12 @@
+{
+  "name": "zexx-gpt",
+  "version": "1.0.0",
+  "private": true,
+  "description": "Zexx GPT — Asisten AI berbasis OpenRouter, di-hosting di Vercel.",
+  "engines": {
+    "node": ">=18"
+  },
+  "scripts": {
+    "dev": "vercel dev"
+  }
+}
