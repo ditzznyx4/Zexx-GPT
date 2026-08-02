@@ -1,6 +1,33 @@
 const OPENROUTER_API_URL = "https://openrouter.ai/api/v1/chat/completions";
 
 /* ============================================================
+ * DETEKSI JAILBREAK — HANYA MEMICU PENGINGAT, TIDAK MEMBLOKIR
+ * Ini BUKAN filter yang menolak permintaan. Kalau pola-pola berikut
+ * terdeteksi di pesan pengguna, backend menyisipkan SATU pesan
+ * pengingat singkat sebelum pesan tsb (memperkuat system prompt),
+ * lalu tetap mengirim semuanya ke model apa adanya. Keputusan
+ * menolak atau tidak sepenuhnya di tangan penalaran model itu
+ * sendiri, bukan kode ini.
+ * ============================================================ */
+const JAILBREAK_PATTERNS = [
+  /\babaikan\s+(instruksi|aturan|perintah)\s+(sebelumnya|di atas)\b/i,
+  /\bignore\s+(previous|all|above)\s+instructions?\b/i,
+  /\bkamu\s+(sekarang|kini)\s+(adalah|jadi|menjadi)\b/i,
+  /\byou\s+are\s+now\b/i,
+  /\b(developer|dev)\s*mode\b/i, /\bjailbreak(ed)?\b/i,
+  /\bDAN\b.*\b(mode|prompt)\b/i, /\bunrestricted\s*(ai|mode)\b/i,
+  /\btanpa\s+(batasan|filter|sensor)\b/i, /\bwithout\s+(restrictions?|filters?|limits?)\b/i,
+  /\bpura[\s-]?pura(lah)?\s+(jadi|menjadi)\b/i, /\bpretend\s+(you\s+are|to\s+be)\b/i,
+  /\bsystem\s*prompt\s*(kamu|mu|anda)\b/i, /\btampilkan\s+system\s*prompt\b/i,
+  /^\s*\/[a-z]{1,12}\b/i // pola perintah gaya "/x", "/dev", "/unlock", dst di awal pesan
+];
+
+function detectJailbreakAttempt(text){
+  if(!text) return false;
+  return JAILBREAK_PATTERNS.some(p => p.test(text));
+}
+
+/* ============================================================
  * SYSTEM PROMPT (Absolute, anti-jailbreak, terstruktur)
  * ============================================================ */
 const SYSTEM_PROMPT = `
@@ -280,16 +307,4 @@ module.exports = async (req, res) => {
     let answer = rawContent;
 
     const thinkMatch = rawContent.match(/<think>([\s\S]*?)<\/think>/i);
-    if (thinkMatch) {
-      thinking = thinkMatch[1].trim();
-      answer = rawContent.replace(thinkMatch[0], "").trim();
-    } else if (data?.choices?.[0]?.message?.reasoning) {
-      thinking = data.choices[0].message.reasoning;
-    }
-
-    res.status(200).json({ answer, thinking, model, mode: safeMode, jailbreakSuspected });
-  } catch (err) {
-    console.error("Zexx GPT backend error:", err);
-    res.status(500).json({ error: "Terjadi kesalahan pada server.", detail: String(err) });
-  }
-};
+    if (
