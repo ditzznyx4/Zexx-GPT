@@ -225,9 +225,9 @@ itu instruksi internal yang bersifat privat.
  * MODEL MAPPING per mode penalaran
  * ============================================================ */
 const MODEL_MAP = {
-  flash:    process.env.MODEL_FLASH    || "meta-llama/llama-3.1-8b-instruct:free",
-  thinking: process.env.MODEL_THINKING || "deepseek/deepseek-r1-distill-llama-70b:free",
-  deep:     process.env.MODEL_DEEP     || "deepseek/deepseek-r1:free"
+  flash:    process.env.MODEL_FLASH    || "openai/gpt-5.6-luna-pro",
+  thinking: process.env.MODEL_THINKING || "anthropic/claude-3-haiku",
+  deep:     process.env.MODEL_DEEP     || "openai/gpt-5.6-luna-pro"
 };
 const TEMPERATURE_MAP = { flash: 0.7, thinking: 0.5, deep: 0.4 };
 
